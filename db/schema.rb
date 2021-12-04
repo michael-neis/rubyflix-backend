@@ -67,7 +67,6 @@ ActiveRecord::Schema.define(version: 2021_12_03_232237) do
   create_table "watchlists", force: :cascade do |t|
     t.integer "user_id"
     t.integer "movie_id"
-    t.integer "ranking"
     t.index ["movie_id"], name: "index_watchlists_on_movie_id"
     t.index ["user_id"], name: "index_watchlists_on_user_id"
   end
