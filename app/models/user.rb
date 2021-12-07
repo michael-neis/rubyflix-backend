@@ -28,30 +28,72 @@ class User < ActiveRecord::Base
 
     
     def suggest_movie
+
+        if self.reviews.length == 0
+            "Please review some movies so we can give you a suggestion!"
+        else
+        
         all_directors = []
         all_genres = []
         all_mpa_ratings = []
+        reviewed_movies = self.reviews.map{|review| review.movie}
 
         highest_rating = reviews.max_by{|review| review.star_rating}.star_rating
-        best_movies = reviews.filter{|review| review.star_rating == highest_rating}.each do |review| 
+        best_movies = reviews.filter{|review| review.star_rating == highest_rating}.each do |review|
             all_directors << review.movie.director
             all_genres << review.movie.genre
             all_mpa_ratings << review.movie.mpa_rating
         end
 
-        top_director = all_directors.tally.max_by{|_, count| count}[0]
-        top_genre = all_genres.tally.max_by{|_, count| count}[0]
-        top_mpa_rating = all_mpa_ratings.tally.max_by{|_, count| count}[0]
+        top_director_tally = all_directors.tally.max_by{|director, count| count}[1]
+        top_genre = all_genres.tally.max_by{|genre, count| count}
+        top_mpa_rating = all_mpa_ratings.tally.max_by{|mpa_rating, count| count}
 
-        first_options = Movie.where(director: top_director, genre: top_genre, mpa_rating: top_mpa_rating)
-        second_options = Movie.where(director: top_director, genre: top_genre)
-        third_options = Movie.where(genre: top_genre)
+        top_directors = all_directors.tally.filter{|director, count| count == top_director_tally}.map{|director| director[0]}
 
-        binding.pry
-        # tally_score = all_attributes.tally.max_by{|_, count| count}[1]
-        # most_common = all_attributes.tally.filter{|_, count| count == tally_score}.keys
-        # first_options = Movie.where(director: most_common[0], genre: most_common[1], rating: most_common[2])
-        # second_options = Movie.where(director: most_common[0], genre: most_common[1])
-        # third_options = Movie.where(genre: most_common[1])
+        if top_mpa_rating[1] > 1 && top_director_tally > 1
+            best_suggestion = first_tier_suggestions(top_directors, top_genre, top_mpa_rating, reviewed_movies)
+            if best_suggestion
+                best_suggestion
+            else
+                second_best_suggestion = second_tier_suggestions(top_directors, top_genre, reviewed_movies)
+                second_best_suggestion ? second_best_suggestion : third_tier_suggestions(top_genre, reviewed_movies)
+            end
+        elsif top_director_tally > 1
+            second_best_suggestion = second_tier_suggestions(top_directors, top_genre, reviewed_movies)
+            second_best_suggestion ? second_best_suggestion : third_tier_suggestions(top_genre, reviewed_movies)
+        elsif top_genre[1] > 1
+            third_best_suggestion = third_tier_suggestions(top_genre, reviewed_movies)
+            third_best_suggestion ? third_best_suggestion : "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
+        else
+            "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
+        end
+
+        end
     end 
+
+    private
+
+    def first_tier_suggestions(top_directors, top_genre, top_mpa_rating, reviewed_movies)
+        first_options = []
+        puts "bogos"
+        top_directors.each{|director| Movie.where(director: director, genre: top_genre[0], mpa_rating: top_mpa_rating[0]).each{|movie| first_options << movie}}
+        puts "binted"
+        no_duplicates = first_options.filter{|movie| reviewed_movies.exclude?(movie)}
+
+        no_duplicates.sample
+    end
+
+    def second_tier_suggestions(top_directors, top_genre, reviewed_movies)
+        # director = top_directors.sample
+        second_options = top_directors.map{|director| Movie.where(director: director, genre: top_genre[0]).filter{|movie| reviewed_movies.exclude?(movie)}}
+        binding.pry
+        second_options.sample
+    end
+
+    def third_tier_suggestions(top_genre, reviewed_movies)
+        third_options = Movie.where(genre: top_genre[0]).filter{|movie| reviewed_movies.exclude?(movie)}
+        third_options.sample
+    end
+
 end
