@@ -2,7 +2,8 @@ puts "Deleting old data..."
 User.destroy_all
 Movie.destroy_all
 Director.destroy_all
-Favorite.destroy_all
+MovieFavorite.destroy_all
+DirectorFavorite.destroy_all
 Friendslist.destroy_all
 Watchlist.destroy_all
 Suggested.destroy_all
@@ -20,13 +21,13 @@ all_directors.each{|dir| Director.create(first_name: dir[0], last_name: dir[1], 
 
 
 puts "Creating movies..."
-all_movies = [["Dune", "Sci-Fi", "PG-13", 0], ["Memento", "Thriller", "PG-13", 1], ["Django", "Western", "R", 2], ["E.T.", "Family", "PG", 3], ["Star Wars", "Sci-Fi", "PG", 4], ["Sicario", "Thriller", "R", 0], ["Blade Runner 2049", "Sci-fi", "R", 0], ["Arrival", "Sci-Fi", "PG-13", 0], ["Prisoners", "Mystery", "R", 0], ["Tenet", "Thriller", "PG-13", 1], ["Inception", "Sci-Fi", "PG-13", 1], ["The Prestige", "Mystery", "PG-13", 1], ["Dunkirk", "War", "PG-13", 1], ["Reservoir Dogs", "Crime", "R", 2], ["Kill Bill", "Action", "R", 2], ["Raiders of the Lost Ark", "Adventure", "PG", 3], ["Saving Private Ryan", "War", "R", 3], ["Gladiator", "Action", "R", 5], ["Thelma and Louise", "Adventure", "R", 5], ["Blade Runner", "Sci-Fi", "R", 5]]
-all_movies.each{|mov| Movie.create(title: mov[0], genre: mov[1], rating: mov[2], director: Director.all[mov[3]])}
+all_movies = [["Dune", "Sci-Fi", "PG-13", 0], ["Memento", "Thriller", "PG-13", 1], ["Django", "Western", "R", 2], ["E.T.", "Family", "PG", 3], ["Star Wars", "Sci-Fi", "PG", 4], ["Sicario", "Thriller", "R", 0], ["Blade Runner 2049", "Sci-Fi", "R", 0], ["Arrival", "Sci-Fi", "PG-13", 0], ["Prisoners", "Mystery", "R", 0], ["Tenet", "Thriller", "PG-13", 1], ["Inception", "Sci-Fi", "PG-13", 1], ["The Prestige", "Mystery", "PG-13", 1], ["Dunkirk", "War", "PG-13", 1], ["Reservoir Dogs", "Crime", "R", 2], ["Kill Bill", "Action", "R", 2], ["Raiders of the Lost Ark", "Adventure", "PG", 3], ["Saving Private Ryan", "War", "R", 3], ["Gladiator", "Action", "R", 5], ["Thelma and Louise", "Adventure", "R", 5], ["Blade Runner", "Sci-Fi", "R", 5]]
+all_movies.each{|mov| Movie.create(title: mov[0], genre: mov[1], mpa_rating: mov[2], director: Director.all[mov[3]])}
 
 
 puts "Creating favorites..."
-Favorite.create(user: user1, movie: Movie.first, ranking: 1)
-Favorite.create(user: user1, director: Director.first, ranking: 1)
+MovieFavorite.create(user: user1, movie: Movie.first, ranking: 1)
+DirectorFavorite.create(user: user1, director: Director.first, ranking: 1)
 
 puts "Creating Watchlist..."
 Watchlist.create(user: user1, movie: Movie.third)
@@ -35,11 +36,18 @@ Watchlist.create(user: user1, movie: Movie.last)
 Watchlist.create(user: user1, movie: Movie.all[4])
 
 puts "Creating Reviews..."
-Review.create(user: user1, movie: Movie.first, rating: 10, comment: "Absolutely loved the world building in this one. Beautifully excicuted by Denis.")
+Review.create(user: user1, movie: Movie.first, star_rating: 10, comment: "Absolutely loved the world building in this one. Beautifully executed by Denis.")
+Review.create(user: user1, movie: Movie.second, star_rating: 10, comment: "Best Nolan film for sure.")
+Review.create(user: user1, movie: Movie.third, star_rating: 1, comment: "Too much violence! I had to leave the theater.")
+Review.create(user: user1, movie: Movie.last, star_rating: 10, comment: "A classic.")
+Review.create(user: user1, movie: Movie.fifth, star_rating: 10, comment: "Another classic.")
+Review.create(user: user1, movie: Movie.all[5], star_rating: 10, comment: "Intense.")
+Review.create(user: user1, movie: Movie.all[8], star_rating: 10, comment: "Thrilling.")
+Review.create(user: user1, movie: Movie.all[-2], star_rating: 10, comment: "Yep.")
 
 
 puts "Creating friends..."
-Friendslist.create(user1: user1.id, user2: user2.id)
+Friendslist.create(user_a_id: user1.id, user_b_id: user2.id)
 
 
 puts "✅ Done seeding!"

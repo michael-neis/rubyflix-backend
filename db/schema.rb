@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_03_232237) do
+ActiveRecord::Schema.define(version: 2021_12_07_000804) do
+
+  create_table "director_favorites", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "director_id"
+    t.integer "ranking"
+    t.index ["director_id"], name: "index_director_favorites_on_director_id"
+    t.index ["user_id"], name: "index_director_favorites_on_user_id"
+  end
 
   create_table "directors", force: :cascade do |t|
     t.string "first_name"
@@ -18,25 +26,23 @@ ActiveRecord::Schema.define(version: 2021_12_03_232237) do
     t.integer "oscars"
   end
 
-  create_table "favorites", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "movie_id"
-    t.integer "director_id"
-    t.integer "ranking"
-    t.index ["director_id"], name: "index_favorites_on_director_id"
-    t.index ["movie_id"], name: "index_favorites_on_movie_id"
-    t.index ["user_id"], name: "index_favorites_on_user_id"
+  create_table "friendslists", force: :cascade do |t|
+    t.integer "user_a_id"
+    t.integer "user_b_id"
   end
 
-  create_table "friendslists", force: :cascade do |t|
-    t.integer "user1"
-    t.integer "user2"
+  create_table "movie_favorites", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "movie_id"
+    t.integer "ranking"
+    t.index ["movie_id"], name: "index_movie_favorites_on_movie_id"
+    t.index ["user_id"], name: "index_movie_favorites_on_user_id"
   end
 
   create_table "movies", force: :cascade do |t|
     t.string "title"
     t.string "genre"
-    t.string "rating"
+    t.string "mpa_rating"
     t.integer "director_id"
     t.index ["director_id"], name: "index_movies_on_director_id"
   end
@@ -44,7 +50,7 @@ ActiveRecord::Schema.define(version: 2021_12_03_232237) do
   create_table "reviews", force: :cascade do |t|
     t.integer "user_id"
     t.integer "movie_id"
-    t.integer "rating"
+    t.integer "star_rating"
     t.string "comment"
     t.index ["movie_id"], name: "index_reviews_on_movie_id"
     t.index ["user_id"], name: "index_reviews_on_user_id"
