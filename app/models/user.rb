@@ -32,68 +32,57 @@ class User < ActiveRecord::Base
         if self.reviews.length == 0
             "Please review some movies so we can give you a suggestion!"
         else
+            
+            #putting each attribute of the highest reviewed movies into it's appropriate array
+            all_directors = []
+            all_genres = []
+            all_mpa_ratings = []
+            reviewed_movies = self.reviews.map{|review| review.movie}
         
-        all_directors = []
-        all_genres = []
-        all_mpa_ratings = []
-        reviewed_movies = self.reviews.map{|review| review.movie}
-
-        highest_rating = reviews.max_by{|review| review.star_rating}.star_rating
-        best_movies = reviews.filter{|review| review.star_rating == highest_rating}.each do |review|
-            all_directors << review.movie.director
-            all_genres << review.movie.genre
-            all_mpa_ratings << review.movie.mpa_rating
-        end
-
-        top_director_tally = all_directors.tally.max_by{|director, count| count}[1]
-        top_genre = all_genres.tally.max_by{|genre, count| count}
-        top_mpa_rating = all_mpa_ratings.tally.max_by{|mpa_rating, count| count}
-
-        top_directors = all_directors.tally.filter{|director, count| count == top_director_tally}.map{|director| director[0]}
-
-        if top_mpa_rating[1] > 1 && top_director_tally > 1
-            best_suggestion = first_tier_suggestions(top_directors, top_genre, top_mpa_rating, reviewed_movies)
-            if best_suggestion
-                best_suggestion
-            else
-                second_best_suggestion = second_tier_suggestions(top_directors, top_genre, reviewed_movies)
-                second_best_suggestion ? second_best_suggestion : third_tier_suggestions(top_genre, reviewed_movies)
+            highest_rating = reviews.max_by{|review| review.star_rating}.star_rating
+            best_movies = reviews.filter{|review| review.star_rating == highest_rating}.each do |review|
+                all_directors << review.movie.director
+                all_genres << review.movie.genre
+                all_mpa_ratings << review.movie.mpa_rating
             end
-        elsif top_director_tally > 1
-            second_best_suggestion = second_tier_suggestions(top_directors, top_genre, reviewed_movies)
-            second_best_suggestion ? second_best_suggestion : third_tier_suggestions(top_genre, reviewed_movies)
-        elsif top_genre[1] > 1
-            third_best_suggestion = third_tier_suggestions(top_genre, reviewed_movies)
-            third_best_suggestion ? third_best_suggestion : "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
-        else
-            "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
-        end
 
-        end
-    end 
+            #finding the highest amount of the most recurring attributes of highest reviewed movies. 
+            top_director_tally = all_directors.tally.max_by{|director, count| count}[1]
+            top_genre_tally = all_genres.tally.max_by{|genre, count| count}[1]
+            top_mpa_rating_tally = all_mpa_ratings.tally.max_by{|mpa_rating, count| count}[1]
 
+            #finding all attributes that have that highest amount
+            top_directors = all_directors.tally.filter{|director, count| count == top_director_tally}.map{|director| director[0]}
+            top_genres = all_genres.tally.filter{|genre, count| count == top_genre_tally}.map{|genre| genre[0]}
+            top_mpa_ratings = all_mpa_ratings.tally.filter{|rating, count| count == top_mpa_rating_tally}.map{|rating| rating[0]}
+
+            find_suggestion({top_directors: top_directors, top_genres: top_genres, top_mpa_ratings: top_mpa_ratings, reviewed_movies: reviewed_movies})
+        end
+    end
+ 
     private
 
-    def first_tier_suggestions(top_directors, top_genre, top_mpa_rating, reviewed_movies)
-        first_options = []
-        puts "bogos"
-        top_directors.each{|director| Movie.where(director: director, genre: top_genre[0], mpa_rating: top_mpa_rating[0]).each{|movie| first_options << movie}}
-        puts "binted"
-        no_duplicates = first_options.filter{|movie| reviewed_movies.exclude?(movie)}
+    def find_suggestion(top_directors:, top_genres:, top_mpa_ratings:, reviewed_movies:)
+        director_movies = []
+        genre_matches = []
+        mpa_rating_matches = []
 
-        no_duplicates.sample
+        top_directors.each{|director| director.movies.each{|movie| director_movies << movie}}
+        top_genres.each{|genre| director_movies.filter{|movie| movie.genre == genre}.each{|movie| genre_matches << movie}}
+        top_mpa_ratings.each{|rating| genre_matches.filter{|movie| movie.mpa_rating == rating}.each{|movie| mpa_rating_matches << movie}}
+
+        all_three_met = mpa_rating_matches.filter{|movie| reviewed_movies.exclude?(movie)}
+        dir_gen_met = genre_matches.filter{|movie| reviewed_movies.exclude?(movie)}
+
+        if all_three_met.length > 0
+            all_three_met.sample
+        elsif dir_gen_met.length > 0
+            dir_gen_met.sample
+        else 
+            general_matches = director_movies
+            top_genres.each{|genre| Movie.where(genre: genre).each{|movie| general_matches << movie}}
+            no_duplicates = general_matches.filter{|movie| reviewed_movies.exclude?(movie)}
+            no_duplicates.length > 0 ? no_duplicates.sample : "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
+        end
     end
-
-    def second_tier_suggestions(top_directors, top_genre, reviewed_movies)
-        # director = top_directors.sample
-        second_options = top_directors.map{|director| Movie.where(director: director, genre: top_genre[0]).filter{|movie| reviewed_movies.exclude?(movie)}}
-        binding.pry
-        second_options.sample
-    end
-
-    def third_tier_suggestions(top_genre, reviewed_movies)
-        third_options = Movie.where(genre: top_genre[0]).filter{|movie| reviewed_movies.exclude?(movie)}
-        third_options.sample
-    end
-
 end
