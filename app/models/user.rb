@@ -26,11 +26,14 @@ class User < ActiveRecord::Base
     # has_many :friendslists, ->(user) {where("friend_a_id = ? OR friend_b_id = ?", user.id, user.id)}
     # has_many :friends, through: :friendslists
 
+    def test_thing
+        "testing"
+    end
     
     def suggest_movie
 
         if self.reviews.length == 0
-            "Please review some movies so we can give you a suggestion!"
+            "no reviews"
         else
             
             #putting each attribute of the highest reviewed movies into it's appropriate array
@@ -82,7 +85,7 @@ class User < ActiveRecord::Base
             general_matches = director_movies
             top_genres.each{|genre| Movie.where(genre: genre).each{|movie| general_matches << movie}}
             no_duplicates = general_matches.filter{|movie| reviewed_movies.exclude?(movie)}
-            no_duplicates.length > 0 ? no_duplicates.sample : "We couldn't find you a match. Try adding more reviews so we can narrow down a suggestion!"
+            no_duplicates.length > 0 ? no_duplicates.sample : "not enough reviews"
         end
     end
 end
