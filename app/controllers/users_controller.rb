@@ -4,11 +4,6 @@ class UsersController < ApplicationController
         user.to_json(include: [:watchlists, :reviews, :movie_favorites, :director_favorites])
     end
 
-    get "/user/watchlist" do
-        movies = User.first.watchlists.map{|w| w.movie}
-        movies.to_json(include: :director)
-    end
-
     get "/user/reviews" do
         movies = User.first.reviews.map{|r| r.movie}
         movies.to_json(include: :director)

@@ -1,5 +1,10 @@
 class WatchlistController < ApplicationController
     
+get "/watchlists" do
+    watchlist = User.first.watchlists
+    watchlist.to_json(include: [:movie, :user])
+end
+
 post '/watchlist' do
     movie = Movie.find(params[:id])
     Watchlist.create(user: User.first, movie: movie)

@@ -48,8 +48,6 @@ Review.create(user: user1, movie: Movie.all[8], star_rating: 10, comment: "Thril
 Review.create(user: user1, movie: Movie.all[-3], star_rating: 10, comment: "Yep.")
 Review.create(user: user1, movie: Movie.all[6], star_rating: 10, comment: "Lovit.")
 Review.create(user: user1, movie: Movie.all[7], star_rating: 10, comment: "Amy Adams good.")
-Review.create(user: user1, movie: Movie.all[-1], star_rating: 10, comment: "Amy Adams good.")
-Review.create(user: user1, movie: Movie.all[10], star_rating: 10, comment: "Amy Adams good.")
 Review.create(user: user2, movie: Movie.all[4], star_rating: 10, comment: "Starb Warg.")
 Review.create(user: user2, movie: Movie.all[0], star_rating: 10, comment: "Mmm.")
 Review.create(user: user2, movie: Movie.all[5], star_rating: 10, comment: "Woah.")

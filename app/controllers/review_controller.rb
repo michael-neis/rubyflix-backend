@@ -3,7 +3,7 @@ class ReviewController < ApplicationController
     post '/reviews' do
         movie = Movie.find(params[:id])
         Review.create(user: User.first, movie: movie, star_rating: params[:star_rating], comment: params[:comment])
-        {message: "Review added to #{movie.title}!"}.to_json
+        User.first.to_json(include: [:watchlists, :reviews, :movie_favorites, :director_favorites])
     end
     
     patch '/reviews/:id' do
@@ -12,7 +12,7 @@ class ReviewController < ApplicationController
             star_rating: params[:star_rating],
             comment: params[:comment]
         )
-        review.to_json
+        User.first.to_json(include: [:watchlists, :reviews, :movie_favorites, :director_favorites])
     end
     
     end
