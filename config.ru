@@ -17,3 +17,4 @@ use MoviesController
 use DirectorsController
 use UsersController
 use WatchlistController
+use ReviewController
