@@ -6,10 +6,13 @@ class User < ActiveRecord::Base
     has_many :reviews
     has_many :movie_favorites
     has_many :director_favorites
-    has_many :movies, through: :watchlists
-    has_many :movies, through: :suggesteds
-    has_many :movies, through: :reviews
-    has_many :movies, through: :movie_favorites
+    has_many :watchlist_movies, through: :watchlists, source: :movie
+    has_many :review_movies, through: :reviews, source: :movie
+    has_many :favorite_movies, through: :movie_favorites, source: :movie
+    # has_many :movies, through: :suggesteds
+    # has_many :movies, through: :reviews
+    # has_many :movies, -> (user) {where review: user.reviews}, through: :watchlists
+    # has_many :movies, through: :movie_favorites
     has_many :directors, through: :director_favorites
     has_many :users, through: :suggesteds
 
@@ -26,8 +29,11 @@ class User < ActiveRecord::Base
     # has_many :friendslists, ->(user) {where("friend_a_id = ? OR friend_b_id = ?", user.id, user.id)}
     # has_many :friends, through: :friendslists
 
-    def test_thing
-        "testing"
+    def movies
+        full_array = []
+        full_array.push(*self.watchlist_movies)
+        full_array.push(*self.review_movies)
+        full_array
     end
     
     def suggest_movie
@@ -62,7 +68,16 @@ class User < ActiveRecord::Base
             find_suggestion({top_directors: top_directors, top_genres: top_genres, top_mpa_ratings: top_mpa_ratings, reviewed_movies: reviewed_movies})
         end
     end
+
+    def find_reviews
+        self.reviews.map{|r| {movie: r.movie, review: r, watchlist: self.watchlists.find{|w| w.movie == r.movie}, director: r.movie.director}}
+    end
+
+    def find_watchlist
+        self.watchlists.map{|w| {movie: w.movie, review: self.reviews.find{|r| r.movie == w.movie}, watchlist: w, director: w.movie.director}}
+    end
  
+
     private
 
     def find_suggestion(top_directors:, top_genres:, top_mpa_ratings:, reviewed_movies:)

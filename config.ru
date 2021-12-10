@@ -18,3 +18,4 @@ use DirectorsController
 use UsersController
 use WatchlistController
 use ReviewController
+use FavoritesController

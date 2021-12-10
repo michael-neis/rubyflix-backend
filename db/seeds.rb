@@ -36,6 +36,7 @@ Watchlist.create(user: user1, movie: Movie.third)
 Watchlist.create(user: user1, movie: Movie.second)
 Watchlist.create(user: user1, movie: Movie.last)
 Watchlist.create(user: user1, movie: Movie.all[4])
+Watchlist.create(user: user2, movie: Movie.all[-1])
 
 puts "Creating Reviews..."
 Review.create(user: user1, movie: Movie.first, star_rating: 10, comment: "Absolutely loved the world building in this one. Beautifully executed by Denis.")

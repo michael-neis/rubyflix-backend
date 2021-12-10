@@ -1,4 +1,8 @@
 class ReviewController < ApplicationController
+
+    get '/reviews' do
+        User.first.find_reviews.to_json
+    end
     
     post '/reviews' do
         movie = Movie.find(params[:id])
