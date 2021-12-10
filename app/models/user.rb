@@ -9,10 +9,6 @@ class User < ActiveRecord::Base
     has_many :watchlist_movies, through: :watchlists, source: :movie
     has_many :review_movies, through: :reviews, source: :movie
     has_many :favorite_movies, through: :movie_favorites, source: :movie
-    # has_many :movies, through: :suggesteds
-    # has_many :movies, through: :reviews
-    # has_many :movies, -> (user) {where review: user.reviews}, through: :watchlists
-    # has_many :movies, through: :movie_favorites
     has_many :directors, through: :director_favorites
     has_many :users, through: :suggesteds
 
@@ -21,13 +17,6 @@ class User < ActiveRecord::Base
         :foreign_key => :user_b_id, :dependent => :destroy)
     has_many :users, :through => :friendslists, :source => :user_b
 
-    # has_and_belongs_to_many(:users,
-    # :join_table => "friendslists",
-    # :foreign_key => "user_a_id",
-    # :association_foreign_key => "post_b_id")
-
-    # has_many :friendslists, ->(user) {where("friend_a_id = ? OR friend_b_id = ?", user.id, user.id)}
-    # has_many :friends, through: :friendslists
 
     def movies
         full_array = []
@@ -64,7 +53,7 @@ class User < ActiveRecord::Base
             top_directors = all_directors.tally.filter{|director, count| count == top_director_tally}.map{|director| director[0]}
             top_genres = all_genres.tally.filter{|genre, count| count == top_genre_tally}.map{|genre| genre[0]}
             top_mpa_ratings = all_mpa_ratings.tally.filter{|rating, count| count == top_mpa_rating_tally}.map{|rating| rating[0]}
-
+            
             find_suggestion({top_directors: top_directors, top_genres: top_genres, top_mpa_ratings: top_mpa_ratings, reviewed_movies: reviewed_movies})
         end
     end
@@ -75,6 +64,10 @@ class User < ActiveRecord::Base
 
     def find_watchlist
         self.watchlists.map{|w| {movie: w.movie, review: self.reviews.find{|r| r.movie == w.movie}, watchlist: w, director: w.movie.director}}
+    end
+
+    def find_genre(genre)
+        Movie.all.filter{|m| m.genre == genre}.map{|m| {movie: m, review: self.reviews.find{|r| r.movie == m}, watchlist: self.watchlists.find{|w| w.movie == m}, director: m.director}}
     end
  
 
@@ -91,7 +84,7 @@ class User < ActiveRecord::Base
 
         all_three_met = mpa_rating_matches.filter{|movie| reviewed_movies.exclude?(movie)}
         dir_gen_met = genre_matches.filter{|movie| reviewed_movies.exclude?(movie)}
-
+        
         if all_three_met.length > 0
             all_three_met.sample
         elsif dir_gen_met.length > 0
