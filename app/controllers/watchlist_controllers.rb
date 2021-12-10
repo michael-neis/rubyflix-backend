@@ -11,9 +11,22 @@ post '/watchlist' do
 end
 
 delete '/watchlist/:id' do
-    movie = Watchlist.find(params[:id])
-    movie.destroy
-    {message: "#{movie.movie.title} removed from Watchlist!", watchlist: movie}.to_json
+    list_movie = Watchlist.find(params[:id])
+    list_movie.destroy
+    {message: "#{list_movie.movie.title} removed from Watchlist!", watchlist: list_movie}.to_json
+end
+
+post '/watchlist/details' do
+    movie = Movie.find(params[:id])
+    item = Watchlist.create(user: User.first, movie: movie)
+    movie.to_json(include: [:director, :watchlist_users, :review_users, :watchlists])
+end
+
+delete '/watchlist/details/:id' do
+    list_movie = Watchlist.find(params[:id])
+    movie = list_movie.movie
+    list_movie.destroy
+    movie.to_json(include: [:director, :watchlist_users, :review_users, :watchlists])
 end
 
 end
