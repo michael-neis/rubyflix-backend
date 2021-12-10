@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 2021_12_07_000804) do
     t.string "title"
     t.string "genre"
     t.string "mpa_rating"
+    t.string "movie_img"
     t.integer "director_id"
     t.index ["director_id"], name: "index_movies_on_director_id"
   end

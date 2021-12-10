@@ -4,6 +4,7 @@ class CreateMovies < ActiveRecord::Migration[6.1]
       t.string :title
       t.string :genre
       t.string :mpa_rating
+      t.string :movie_img
       t.references :director
     end
   end
